@@ -1,0 +1,11 @@
+state_code,state_name,region
+CA,California,West
+NY,New York,Northeast
+TX,Texas,South
+FL,Florida,South
+IL,Illinois,Midwest
+WA,Washington,West
+MA,Massachusetts,Northeast
+GA,Georgia,South
+PA,Pennsylvania,Northeast
+AZ,Arizona,West

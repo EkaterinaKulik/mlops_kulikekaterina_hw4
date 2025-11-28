@@ -1,0 +1,7 @@
+[sqlfluff]
+dialect = clickhouse
+templater = dbt
+
+exclude_rules = L009,L031
+
+[sqlfluff:rules]

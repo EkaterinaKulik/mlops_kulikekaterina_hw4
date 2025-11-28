@@ -1,0 +1,12 @@
+name: fraud_dbt_project
+version: '1.0.0'
+config-version: 2
+
+profile: fraud_dbt_project
+
+models:
+  fraud_dbt_project:
+    staging:
+      materialized: view
+    marts:
+      materialized: table

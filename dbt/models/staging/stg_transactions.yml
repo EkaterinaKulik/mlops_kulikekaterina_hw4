@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: >
+      Cleaned and normalized transactional data based on the raw
+      transactions_db.transactions source. Used as a base layer for marts.
+
+    columns:
+      - name: transaction_time
+        description: Original transaction timestamp
+        tests:
+          - not_null
+
+      - name: transaction_date
+        description: Calendar date of the transaction
+        tests:
+          - not_null
+
+      - name: transaction_hour
+        description: Hour of the transaction (0–23)
+
+      - name: day_of_week
+        description: Day of week of the transaction (1 = Monday, 7 = Sunday)
+
+      - name: merchant_id
+        description: Normalized merchant identifier
+        tests:
+          - not_null
+
+      - name: category_id
+        description: Normalized transaction category identifier
+
+      - name: name_1
+        description: Customer first name
+
+      - name: name_2
+        description: Customer last name
+
+      - name: customer_name
+        description: Concatenated customer full name
+
+      - name: gender_normalized
+        description: Normalized customer gender (m/f)
+        tests:
+          - accepted_values:
+              values: ['m', 'f']
+
+      - name: us_state
+        description: US state code of the customer
+        tests:
+          - not_null
+
+      - name: customer_lat
+        description: Customer latitude
+
+      - name: customer_lon
+        description: Customer longitude
+
+      - name: merchant_lat
+        description: Merchant latitude
+
+      - name: merchant_lon
+        description: Merchant longitude
+
+      - name: amount
+        description: Transaction amount in monetary units
+        tests:
+          - not_null
+
+      - name: amount_bucket
+        description: >
+          Segmented transaction amount bucket (LOW, MEDIUM, HIGH, VERY_HIGH)
+          calculated via custom macro amount_bucket.
+
+      - name: is_fraud
+        description: Binary fraud flag (1 = fraud, 0 = non-fraud)
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]

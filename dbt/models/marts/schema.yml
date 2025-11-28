@@ -57,11 +57,182 @@ models:
 
       - name: fraud_rate
         description: >
-          Fraud rate in percent (0–100), calculated as
-          fraud_cnt / transactions_cnt * 100.
+          Fraud rate in percent (0–100),
+          calculated as fraud_cnt / transactions_cnt * 100.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+              strictly: false
 
       - name: amount_sum
         description: Total transaction amount in this category
 
       - name: fraud_amount_sum
         description: Total amount of fraud transactions in this category
+
+  - name: mart_fraud_by_state
+    description: >
+      Geographic fraud analytics by US state. For each state the model
+      provides total and fraudulent transaction counts, fraud rate, number
+      of unique customers and merchants and monetary volumes.
+    columns:
+      - name: us_state
+        description: US state code
+        tests:
+          - not_null
+
+      - name: transactions_cnt
+        description: Total number of transactions in this state
+
+      - name: fraud_cnt
+        description: Number of fraud transactions in this state
+
+      - name: fraud_rate
+        description: >
+          Fraud rate in percent (0–100) for the given state.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+              strictly: false
+
+      - name: unique_customers_cnt
+        description: Number of unique customers in this state
+
+      - name: unique_merchants_cnt
+        description: Number of unique merchants in this state
+
+      - name: amount_sum
+        description: Total transaction amount in this state
+
+      - name: fraud_amount_sum
+        description: Total amount of fraud transactions in this state
+
+  - name: mart_customer_risk_profile
+    description: >
+      Customer-level risk profile based on historical transactions and fraud
+      activity. For each customer the model provides volume, fraud rate and
+      risk segment (HIGH / MEDIUM / LOW).
+    columns:
+      - name: customer_name
+        description: Customer full name used as a surrogate identifier
+        tests:
+          - not_null
+
+      - name: us_state
+        description: US state code of the customer
+
+      - name: transactions_cnt
+        description: Total number of transactions of the customer
+
+      - name: fraud_transactions_cnt
+        description: Number of fraud transactions of the customer
+
+      - name: fraud_rate
+        description: >
+          Customer-level fraud rate in percent (0–100).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+              strictly: false
+
+      - name: avg_amount
+        description: Average transaction amount for the customer
+
+      - name: last_transaction_date
+        description: Date of the most recent transaction of the customer
+
+      - name: risk_segment
+        description: >
+          Risk segment of the customer based on fraud_rate
+          (HIGH / MEDIUM / LOW).
+        tests:
+          - accepted_values:
+              values: ['HIGH', 'MEDIUM', 'LOW']
+
+    tests:
+      - unique:
+          column_name: customer_name
+
+  - name: mart_hourly_fraud_pattern
+    description: >
+      Hourly fraud patterns by day of week. For each day of week and hour
+      the model provides transaction volumes, fraud counts, fraud rate and
+      monetary metrics.
+    columns:
+      - name: day_of_week
+        description: Day of week (1 = Monday, 7 = Sunday)
+        tests:
+          - not_null
+
+      - name: transaction_hour
+        description: Hour of the day (0–23)
+        tests:
+          - not_null
+
+      - name: transactions_cnt
+        description: Number of transactions for the given day of week and hour
+
+      - name: fraud_cnt
+        description: Number of fraud transactions for the given day and hour
+
+      - name: fraud_rate
+        description: >
+          Fraud rate in percent (0–100) for the given day of week and hour.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+              strictly: false
+
+      - name: amount_sum
+        description: Total transaction amount for the given day and hour
+
+      - name: amount_avg
+        description: Average transaction amount for the given day and hour
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ['day_of_week', 'transaction_hour']
+
+  - name: mart_merchant_analytics
+    description: >
+      Merchant-level analytics including turnover, fraud rate and a simple
+      suspicious flag based on fraud activity.
+    columns:
+      - name: merchant_id
+        description: Merchant identifier
+        tests:
+          - not_null
+
+      - name: transactions_cnt
+        description: Total number of transactions for this merchant
+
+      - name: amount_sum
+        description: Total transaction amount for this merchant
+
+      - name: fraud_cnt
+        description: Number of fraud transactions for this merchant
+
+      - name: fraud_rate
+        description: >
+          Fraud rate in percent (0–100) for this merchant.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+              strictly: false
+
+      - name: is_suspicious
+        description: >
+          Binary flag marking merchant as suspicious based on fraud activity.
+          1 = suspicious, 0 = not suspicious.
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+    tests:
+      - unique:
+          column_name: merchant_id

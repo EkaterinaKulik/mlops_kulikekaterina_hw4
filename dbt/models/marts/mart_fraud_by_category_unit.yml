@@ -1,0 +1,84 @@
+version: 2
+
+unit_tests:
+  - name: mart_fraud_by_category_basic
+    description: >
+      Basic unit test for mart_fraud_by_category: checks that aggregation
+      of transactions and fraud counters by category_id works as expected.
+    model: ref('mart_fraud_by_category')
+
+    given:
+      - input: ref('stg_transactions')
+        rows:
+          - transaction_time: '2024-01-01 10:00:00'
+            transaction_date: '2024-01-01'
+            transaction_hour: 10
+            day_of_week: 1
+            merchant_id: 'M_1'
+            category_id: 'CAT_A'
+            name_1: 'John'
+            name_2: 'Doe'
+            customer_name: 'John Doe'
+            gender_normalized: 'm'
+            us_state: 'CA'
+            customer_lat: 0.0
+            customer_lon: 0.0
+            merchant_lat: 0.0
+            merchant_lon: 0.0
+            amount: 100.0
+            amount_bucket: 'MEDIUM'
+            is_fraud: 0
+
+          - transaction_time: '2024-01-01 11:00:00'
+            transaction_date: '2024-01-01'
+            transaction_hour: 11
+            day_of_week: 1
+            merchant_id: 'M_2'
+            category_id: 'CAT_A'
+            name_1: 'John'
+            name_2: 'Doe'
+            customer_name: 'John Doe'
+            gender_normalized: 'm'
+            us_state: 'CA'
+            customer_lat: 0.0
+            customer_lon: 0.0
+            merchant_lat: 0.0
+            merchant_lon: 0.0
+            amount: 200.0
+            amount_bucket: 'HIGH'
+            is_fraud: 1
+
+          - transaction_time: '2024-01-01 12:00:00'
+            transaction_date: '2024-01-01'
+            transaction_hour: 12
+            day_of_week: 1
+            merchant_id: 'M_3'
+            category_id: 'CAT_B'
+            name_1: 'Alice'
+            name_2: 'Smith'
+            customer_name: 'Alice Smith'
+            gender_normalized: 'f'
+            us_state: 'NY'
+            customer_lat: 0.0
+            customer_lon: 0.0
+            merchant_lat: 0.0
+            merchant_lon: 0.0
+            amount: 300.0
+            amount_bucket: 'HIGH'
+            is_fraud: 0
+
+    expect:
+      rows:
+        - category_id: 'CAT_A'
+          transactions_cnt: 2
+          fraud_cnt: 1
+          fraud_rate: 50.0
+          amount_sum: 300.0
+          fraud_amount_sum: 200.0
+
+        - category_id: 'CAT_B'
+          transactions_cnt: 1
+          fraud_cnt: 0
+          fraud_rate: 0.0
+          amount_sum: 300.0
+          fraud_amount_sum: 0.0

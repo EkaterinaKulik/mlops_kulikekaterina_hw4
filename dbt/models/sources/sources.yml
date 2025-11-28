@@ -1,0 +1,71 @@
+version: 2
+
+sources:
+  - name: transactions_db
+    description: >
+      Raw transactional data loaded into ClickHouse by the user.
+      Contains information about transactions and a binary fraud label.
+
+    database: transactions_db
+    schema: transactions_db
+
+    tables:
+      - name: transactions
+        description: >
+          Raw table with transaction-level data including merchant, category,
+          customer location, transaction amount and fraud indicator.
+
+        columns:
+          - name: transaction_time
+            description: Timestamp of the transaction
+            tests:
+              - not_null
+
+          - name: merch
+            description: Merchant identifier / name
+            tests:
+              - not_null
+
+          - name: cat_id
+            description: Transaction category identifier
+
+          - name: amount
+            description: Transaction amount
+            tests:
+              - not_null
+
+          - name: name_1
+            description: Customer first name
+
+          - name: name_2
+            description: Customer last name
+
+          - name: gender
+            description: Customer gender (M/F)
+            tests:
+              - accepted_values:
+                  values: ['M', 'F']
+
+          - name: us_state
+            description: US state of the customer
+            tests:
+              - not_null
+
+          - name: lat
+            description: Customer latitude
+
+          - name: lon
+            description: Customer longitude
+
+          - name: merchant_lat
+            description: Merchant latitude
+
+          - name: merchant_lon
+            description: Merchant longitude
+
+          - name: target
+            description: Fraud indicator (1 = fraud, 0 = non-fraud)
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [0, 1]

@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: mart_daily_state_metrics
+    description: >
+      Daily aggregated metrics by US state. For each calendar date and state
+      the model provides the number of transactions, total turnover, average
+      check, p95 of transaction amount and share of large transactions.
+    columns:
+      - name: transaction_date
+        description: Calendar date of the transactions
+        tests:
+          - not_null
+
+      - name: us_state
+        description: US state code
+        tests:
+          - not_null
+
+      - name: transactions_cnt
+        description: Number of transactions for the given date and state
+
+      - name: amount_sum
+        description: Total transaction amount for the given date and state
+
+      - name: amount_avg
+        description: Average transaction amount (average check)
+
+      - name: amount_p95
+        description: 95th percentile of transaction amount for the given group
+
+      - name: big_txn_share
+        description: >
+          Share of large transactions (HIGH and VERY_HIGH amount buckets)
+          in total number of transactions for the given date and state.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ['transaction_date', 'us_state']
+
+  - name: mart_fraud_by_category
+    description: >
+      Fraud analytics by transaction category. For each category the model
+      provides total number of transactions, number of fraud cases, fraud rate
+      in percent and monetary volumes (total and fraudulent).
+    columns:
+      - name: category_id
+        description: Transaction category identifier
+        tests:
+          - not_null
+
+      - name: transactions_cnt
+        description: Total number of transactions in this category
+
+      - name: fraud_cnt
+        description: Number of fraud transactions in this category
+
+      - name: fraud_rate
+        description: >
+          Fraud rate in percent (0–100), calculated as
+          fraud_cnt / transactions_cnt * 100.
+
+      - name: amount_sum
+        description: Total transaction amount in this category
+
+      - name: fraud_amount_sum
+        description: Total amount of fraud transactions in this category
